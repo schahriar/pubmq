@@ -6,7 +6,6 @@ const PubMQProtocol = require("./protocol/common");
 class PubMQServer extends PubMQProtocol {
   constructor() {
     super();
-    this.server = dgram.createSocket('udp4');
     this.channels = new Map();
   }
   
