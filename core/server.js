@@ -11,14 +11,17 @@ class PubMQServer extends PubMQProtocol {
   }
   
   publish(sender, channel, buffer) {
-    // If Channel doesn't exist no one is listening
-    if (!this.hasChannel(channel)) return;
+    // Create channel if it doesn't exist
+    if (!this.channels.has(channel)) this.channels.create(channel);
     
     let members = this.channels.getAddresses(channel);
     members.forEach((member) => {
       // Broadcast to members of Channel
       this.send(["RES", channel], member, buffer);
     });
+    
+    // Push Message to Queue
+    this.channels.pushMessage(channel, buffer);
   }
   
   subscribe(sender, channel, port) {
@@ -26,11 +29,20 @@ class PubMQServer extends PubMQProtocol {
     
     // Create channel if it doesn't exist
     if (!this.channels.has(channel)) this.channels.create(channel);
-    // Create new subscription
-    this.channels.pushAddress(channel, {
+    // Assign member address
+    let memberAddress = {
       address: sender.address,
       port: port.toString('utf8')
-    });
+    };
+    // Create new subscription
+    this.channels.pushAddress(channel, memberAddress);
+    
+    // Send over latest queued messages
+    let messages = this.channels.getMessages(channel);
+    for (let i = 0; i < messages.length; i++) {
+      // Broadcast to members of Channel
+      this.send(["RES", channel], memberAddress, messages[i]);
+    }
   }
   
   hasChannel(name) {
