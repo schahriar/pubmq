@@ -1,0 +1,33 @@
+{
+  "name": "pubmq",
+  "version": "1.0.0",
+  "description": "0.1.0",
+  "main": "pubmq.js",
+  "scripts": {
+    "test": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec tests/runner.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schahriar/pubmq.git"
+  },
+  "keywords": [
+    "pub",
+    "sub",
+    "mq",
+    "message",
+    "broker",
+    "queue",
+    "udp"
+  ],
+  "author": "Schahriar SaffarShargh <info@schahriar.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/schahriar/pubmq/issues"
+  },
+  "homepage": "https://github.com/schahriar/pubmq#readme",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.2",
+    "mocha": "^2.4.5"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "esnext": true,
+  "predef": ["Buffer", "require", "process", "setImmediate", "module", "setInterval"]
+}
