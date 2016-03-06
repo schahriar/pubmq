@@ -27,7 +27,7 @@ class PubMQProtocol extends EventEmitter {
       }
     }
     // Packet not parsable, ignore
-    if (partCount < 1) return [null, null, buffer];
+    if (!parts[partCount]) return [null, null, buffer];
     // Parsing error, ignore
     if (partCount > 2) return [null, null, buffer];
     
