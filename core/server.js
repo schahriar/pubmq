@@ -1,82 +1,13 @@
 "use strict";
 
 const dgram = require('dgram');
-const EventEmitter = require("events");
-const BreakCharacter = ' '.charCodeAt(0);
+const PubMQProtocol = require("./protocol/common");
 
-class PubMQServer extends EventEmitter {
+class PubMQServer extends PubMQProtocol {
   constructor() {
     super();
     this.server = dgram.createSocket('udp4');
     this.channels = new Map();
-  }
-  
-  _parseMessage(buffer) {
-    let command = "";
-    let channel = "";
-    let step = 0;
-    let i = 0;
-    
-    for (i = 0; i < buffer.length; i++) {
-      if (buffer[i] === BreakCharacter) {
-        if (step >= 1) {
-          break;
-        }
-        step++;
-      } else {
-        if (step < 1) {
-          command += String.fromCharCode(buffer[i]);
-        } else {
-          channel += String.fromCharCode(buffer[i]);
-        }
-      }
-    }
-    // Packet not parsable, ignore
-    if (step < 1) return [null, null, buffer];
-    
-    return [command, channel, buffer.slice(i + 1, buffer.length)];
-  }
-  
-  _handler(message, sender) {
-    let parsedMessage = this._parseMessage(message);
-    let command = parsedMessage[0];
-    let channel = parsedMessage[1];
-    let buffer = parsedMessage[2];
-    
-    // PubMQ Requires a command
-    if (!command) return;
-    // List of handlers
-    switch(command) {
-      case "PUB":
-        this.publish(sender, channel, buffer);
-      break;
-      case "SUB":
-        this.subscribe(sender, channel, buffer);
-      break;
-      case "PING":
-        this.ping(sender);
-      break;
-    }
-  }
-  
-  send(channel, destination, buffer, callback) {
-    // Create new UDP Client
-    const client = dgram.createSocket('udp4');
-    // Validate/convert buffer to string
-    if (!Buffer.isBuffer(buffer)) buffer = new Buffer(buffer);
-    // Create UDP Packet
-    let MessageBuffer = Buffer.concat([new Buffer(channel + " "), buffer]);
-    
-    // Send Over UDP to destination
-    client.send(MessageBuffer, 0, MessageBuffer.length, destination.port, destination.address, (error) => {
-      if (error && callback) return callback(error);
-      else if (error && !callback) {
-        // Retry once if packet has failed
-        this.send(channel, destination, buffer, function UDP_RETRY(error) {
-          client.close();
-        });
-      } else client.close();
-    });
   }
   
   publish(sender, channel, buffer) {
@@ -86,7 +17,7 @@ class PubMQServer extends EventEmitter {
     let members = this.getChannel(channel);
     for (let i = 0; i < members.length; i++) {
       // Broadcast to members of Channel
-      this.send(channel, members[i], buffer);
+      this.send(["RES", channel], members[i], buffer);
     }
   }
   
