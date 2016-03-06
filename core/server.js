@@ -1,30 +1,33 @@
 "use strict";
 
 const dgram = require('dgram');
+const ChannelController = require("./Channel");
 const PubMQProtocol = require("./protocol/common");
 
 class PubMQServer extends PubMQProtocol {
-  constructor() {
+  constructor(options) {
     super();
-    this.channels = new Map();
+    this.channels = new ChannelController(options);
   }
   
   publish(sender, channel, buffer) {
     // If Channel doesn't exist no one is listening
     if (!this.hasChannel(channel)) return;
     
-    let members = this.getChannel(channel);
-    for (let i = 0; i < members.length; i++) {
+    let members = this.channels.getAddresses(channel);
+    members.forEach((member) => {
       // Broadcast to members of Channel
-      this.send(["RES", channel], members[i], buffer);
-    }
+      this.send(["RES", channel], member, buffer);
+    });
   }
   
   subscribe(sender, channel, port) {
     if (!this.hasChannel(channel)) this.createChannel(channel); 
     
+    // Create channel if it doesn't exist
+    if (!this.channels.has(channel)) this.channels.create(channel);
     // Create new subscription
-    this.getChannel(channel).push({
+    this.channels.pushAddress(channel, {
       address: sender.address,
       port: port.toString('utf8')
     });
@@ -35,7 +38,7 @@ class PubMQServer extends PubMQProtocol {
   }
   
   createChannel(name) {
-    this.channels.set(name, []);
+    this.channels.create(name);
   }
   
   getChannel(name) {
