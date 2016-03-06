@@ -88,11 +88,15 @@ class PubMQProtocol extends EventEmitter {
   _onPong(sender, port) {
     // Override port
     sender.port = port.toString("utf8");
-    this.emit(["pong"], sender);
+    this.emit("pong", sender);
   }
   
-  ping(receiver) {
+  ping(receiver, callback) {
     this.send(["PING", "<>"], receiver || this.address, this.port.toString());
+    // Create event-based callback if provided
+    if (typeof callback === "function") this.once("pong", (sender) => {
+      callback(null, sender);
+    });
   }
   
   pong(sender, port) {

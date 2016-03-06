@@ -8,8 +8,7 @@ describe("Initialization Test Suite", function () {
   it("should ping/pong", function (done) {
     var client = new PubMQ.Client(8087);
     client.connect("localhost:18080");
-    client.ping();
-    client.on("pong", function (address) {
+    client.ping(null, function (error, address) {
       expect(address).to.have.property("port", "18080");
       done();
     });
