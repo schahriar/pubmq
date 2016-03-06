@@ -54,7 +54,10 @@ class PubMQProtocol extends EventEmitter {
         this.subscribe(sender, channel, buffer);
       break;
       case "PING":
-        this.ping(sender);
+        this.pong(sender, buffer);
+      break;
+      case "PONG":
+        this._onPong(sender, buffer);
       break;
       case "RES":
         this.resource(sender, channel, buffer);
@@ -80,6 +83,23 @@ class PubMQProtocol extends EventEmitter {
         });
       } else client.close();
     });
+  }
+  
+  _onPong(sender, port) {
+    // Override port
+    sender.port = port.toString("utf8");
+    this.emit(["pong"], sender);
+  }
+  
+  ping(receiver) {
+    this.send(["PING", "<>"], receiver || this.address, this.port.toString());
+  }
+  
+  pong(sender, port) {
+    this.send(["PONG", "<>"], {
+      address: sender.address,
+      port: port
+    }, this.port.toString());
   }
 }
 

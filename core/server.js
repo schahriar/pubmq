@@ -30,13 +30,6 @@ class PubMQServer extends PubMQProtocol {
     });
   }
   
-  ping(sender) {
-    /**
-     * @todo: Implement Client-side version
-     */
-    this.send("ping", sender, "pong");
-  }
-  
   hasChannel(name) {
     return this.channels.has(name);
   }
@@ -64,6 +57,9 @@ class PubMQServer extends PubMQProtocol {
   listen(port) {
     let MessageHandler = this._handler.bind(this);
     let ErrorHandler = this.log.bind(this, "PubMQ:ERROR");
+    
+    // Set server port
+    this.port = port;
     
     this.server.on('message', MessageHandler);
     // Emit Listening event
