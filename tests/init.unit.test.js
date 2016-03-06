@@ -13,6 +13,14 @@ describe("Initialization Test Suite", function () {
       done();
     });
   });
+  it("should ping on connect", function (done) {
+    var client = new PubMQ.Client(8094);
+    client.connect("localhost:18080", function (error, address) {
+      if (error) throw error;
+      expect(address).to.have.property("port", '18080');
+      done();
+    });
+  });
   it("should pub/sub", function (done) {
     var client1 = new PubMQ.Client(8090);
     client1.connect("localhost:18080");

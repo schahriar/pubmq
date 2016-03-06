@@ -25,7 +25,7 @@ class PubMQClient extends PubMQProtocol {
     this.emit(":*", buffer);
   }
   
-  connect(host) {
+  connect(host, callback) {
     let MessageHandler = this._handler.bind(this);
     
     // Destination Address, format: "<address>:<port>"
@@ -46,6 +46,11 @@ class PubMQClient extends PubMQProtocol {
      */
     // Bind to local port
     this.server.bind(this.port);
+    
+    // If callback is provided ping host for response
+    if (typeof callback === 'function') {
+      this.ping(null, callback);
+    }
   }
 }
 
