@@ -1,4 +1,5 @@
 // #1
+var client1;
 describe("Initialization Test Suite", function () {
   this.timeout(5000);
   it("should start listening", function (done) {
@@ -8,6 +9,7 @@ describe("Initialization Test Suite", function () {
   it("should ping/pong", function (done) {
     var client = new PubMQ.Client(8087);
     client.connect("localhost:18080");
+    client.publish("hello", "Queued Message");
     client.ping(null, function (error, address) {
       expect(address).to.have.property("port", "18080");
       done();
@@ -21,11 +23,17 @@ describe("Initialization Test Suite", function () {
       done();
     });
   });
-  it("should pub/sub", function (done) {
-    var client1 = new PubMQ.Client(8090);
+  it("should subscribe and receive queued messages", function (done) {
+    client1 = new PubMQ.Client(8090);
     client1.connect("localhost:18080");
     client1.subscribe("hello");
-    client1.on(":hello", function (message) {
+    client1.once(":hello", function (message) {
+      expect(message.toString()).to.equal("Queued Message");
+      done();
+    });
+  });
+  it("should pub/sub", function (done) {
+    client1.once(":hello", function (message) {
       expect(message.toString()).to.equal("hello world!");
       done();
     });
