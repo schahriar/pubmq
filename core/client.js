@@ -4,33 +4,10 @@ const dgram = require('dgram');
 const PubMQProtocol = require("./protocol/common");
 
 class PubMQClient extends PubMQProtocol {
-  constructor(address, port) {
+  constructor(port) {
     super();
-    
-    // Destination Address, format: "<address>:<port>"
-    this.address = {
-      address: address.split(':')[0],
-      port: parseInt(address.split(':')[1])
-    };
-    // Local port
-    this.port = port || 14870;
-    
-    let MessageHandler = this._handler.bind(this);
-    
-    this.server = dgram.createSocket('udp4');
-    
-    this.server.on('message', MessageHandler);
-    // Emit Listening event
-    this.server.on('listening', () => { this.emit("listening", this.server.address()); });
-    // Handler Errors
-    this.server.on('error', (error) => { this.emit('error', error); });
-    // Handler Close Event
-    this.server.on('close', () => { this.emit('closed'); });
-    /**
-     * @todo: automatically find free port
-     */
-    // Bind to local port
-    this.server.bind(this.port);
+    // Set Local port
+    this.port = port;
   }
   
   subscribe(channel) {
@@ -46,6 +23,29 @@ class PubMQClient extends PubMQProtocol {
     this.emit(":" + channel, buffer);
     // Invoke Global listeners
     this.emit(":*", buffer);
+  }
+  
+  connect(host) {
+    let MessageHandler = this._handler.bind(this);
+    
+    // Destination Address, format: "<address>:<port>"
+    this.address = {
+      address: host.split(':')[0],
+      port: parseInt(host.split(':')[1])
+    };
+    
+    this.server.on('message', MessageHandler);
+    // Emit Listening event
+    this.server.on('listening', () => { this.emit("listening", this.server.address()); });
+    // Handler Errors
+    this.server.on('error', (error) => { this.emit('error', error); });
+    // Handler Close Event
+    this.server.on('close', () => { this.emit('closed'); });
+    /**
+     * @todo: automatically find free port
+     */
+    // Bind to local port
+    this.server.bind(this.port);
   }
 }
 
