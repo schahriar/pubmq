@@ -53,14 +53,14 @@ class PubMQProtocol extends EventEmitter {
       case "SUB":
         this.subscribe(sender, channel, buffer);
       break;
+      case "RES":
+        this.resource(sender, channel, buffer);
+      break;
       case "PING":
         this.pong(sender, buffer);
       break;
       case "PONG":
         this._onPong(sender, buffer);
-      break;
-      case "RES":
-        this.resource(sender, channel, buffer);
       break;
     }
   }
