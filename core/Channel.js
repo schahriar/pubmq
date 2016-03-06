@@ -20,6 +20,10 @@ class Channel {
     return this.map.get(name).list;
   }
   
+  getMessages(name) {
+    return this.map.get(name).queue.list();
+  }
+  
   create(name) {
     this.map.set(name, {
       queue: new SmartQueue(parseInt(this.options.size) || 10, this.options.ttl || 5000),
