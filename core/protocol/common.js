@@ -63,10 +63,10 @@ class PubMQProtocol extends EventEmitter {
   }
   
   send(commands, destination, buffer, callback) {
-    // Create new UDP Client
+    // Create a new UDP Client
     const client = dgram.createSocket('udp4');
     // Validate/convert buffer to string
-    if (!Buffer.isBuffer(buffer)) buffer = new Buffer(buffer);
+    if (!Buffer.isBuffer(buffer)) buffer = new Buffer(buffer || "");
     // Create UDP Packet
     let MessageBuffer = Buffer.concat([new Buffer(commands.join(":") + " "), buffer]);
     
