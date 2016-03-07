@@ -35,22 +35,22 @@ class PubMQClient extends PubMQProtocol {
     };
     
     this.server.on('message', MessageHandler);
-    // Emit Listening event
-    this.server.on('listening', () => { this.emit("listening", this.server.address()); });
     // Handler Errors
     this.server.on('error', (error) => { this.emit('error', error); });
     // Handler Close Event
     this.server.on('close', () => { this.emit('closed'); });
-    /**
-     * @todo: automatically find free port
-     */
-    // Bind to local port
-    this.server.bind(this.port);
-    
-    // If callback is provided ping host for response
-    if (typeof callback === 'function') {
-      this.ping(null, callback);
-    }
+    // Emit Listening event & store port
+    this.server.on('listening', () => {
+      this.emit("listening", this.server.address());
+      this.port = this.server.address().port;
+      
+      // If callback is provided ping host for response
+      if (typeof callback === 'function') {
+        this.ping(null, callback);
+      }
+    });
+    // Bind to random port
+    this.server.bind();
   }
 }
 
