@@ -82,7 +82,7 @@ class PubMQServer extends PubMQProtocol {
     
     this.server.on('message', MessageHandler);
     // Emit Listening event
-    this.server.on('listening', () => { this.emit("listening", this.server.address()); });
+    this.server.on('listening', () => { this.emit("listening", this.server.address()); this.log("LISTENING ON", this.server.address().port); });
     // Handler Errors
     this.server.on('error', ErrorHandler);
     // Handler Close Event

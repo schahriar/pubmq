@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+'use strict';
+
+process.title = 'pubmq';
+
+const path = require('path');
+const pm2 = require('pm2');
+const ProcessName = "PubMQ__DAEMON";
+
+var argv = require('yargs')
+    .usage('Usage: $0 <command> [options]')
+    .command('install', 'Install PubMQ server')
+    .command('uninstall', 'Uninstall server')
+    .command('status', 'Get process status')
+    .command('startup', 'Create a startup script')
+    .demand(1)
+    .example('pubmq install -p=9102', 'Launch PubMQ Server on port 9102')
+    .demand('p')
+    .alias('p', 'port')
+    .describe('p', "Port number")
+    .alias('t', 'ttl')
+    .describe('t', "TTL (Time to live) of messages in queue")
+    .alias('q', 'QueueSize')
+    .describe('q', "Maximum size of messages stored in a queue per channel. You should keep this value low (below 20) to prevent unwanted network congestion.")
+    .number(['p', 't', 'q'])
+    .help('h')
+    .alias('h', 'help')
+    .argv;
+
+// Connect to Process Manager (PM2)
+
+pm2.connect(function(error) {
+  if(error) throw error;
+  
+  if (argv._[0] === "install") {
+    pm2.start(path.resolve(__dirname, './daemon.js'), { name: ProcessName, force : true, scriptArgs: process.argv }, function(error, proc) {
+      if (error) throw error;
+      
+      console.log("PubMQ successfully installed. Use `pubmq startup <platform>` to create a startup script.");
+      return process.exit(0);
+    });
+  } else if (argv._[0] === "uninstall") {
+    pm2.delete(ProcessName, function(error, proc) {
+      if (error) throw error;
+      
+      console.log("PubMQ successfully uninstalled.");
+      return process.exit(0);
+    });
+  } else if (argv._[0] === "status") {
+    pm2.list(function(err, process_list) {
+      var proc;
+      for (var i = 0; i < process_list.length; i++) {
+        if (process_list[i].name === ProcessName) {
+          proc = process_list[i];
+          break;
+        }
+      }
+      if (!proc) return console.log("Process not found. Try starting a new one using `pubmq install`");
+      
+      console.log(`${proc.name} | ${proc.pm2_env.status} | PID:${proc.pid} | MEM:${proc.monit.memory}`);
+      return process.exit(0);
+    });
+  } else if (argv._[0] === "startup") {
+    // Check for Windows
+    if (process.platform === 'win32') {
+      console.log("No startup script for Windows. Please install https://www.npmjs.com/package/pm2-windows-startup instead.");
+      return process.exit(0);
+    }
+    pm2.startup(argv._[1], function (error, script) {
+      if (error) throw error;
+      
+      console.log("Run the script below as sudo:");
+      console.log(script);
+      return process.exit(0);
+    });
+  } else {
+    return process.exit(0);
+  }
+});
