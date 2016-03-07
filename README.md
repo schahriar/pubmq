@@ -1,7 +1,7 @@
 # PubMQ
 PubMQ is a lightweight message queue and pub/sub library that uses a custom protocol implemented as a small layer on top of the UDP protocol. It is idea for **real-time communication** where asynchronous messages are broadcasted within channels.
 
-*Note that PubMQ is unreliable (UDP) by design and thus ideal for time critical applications.*
+*Note that PubMQ is connectionless and unreliable (UDP) by design and thus ideal for time critical applications.*
 
 ------
 
@@ -9,11 +9,11 @@ PubMQ is a lightweight message queue and pub/sub library that uses a custom prot
 [![Test Coverage](https://codeclimate.com/github/schahriar/pubmq/badges/coverage.svg)](https://codeclimate.com/github/schahriar/pubmq/coverage)
 
 ## Installation
-### Client:
+#### Client:
 ```
 npm install --save pubmq
 ```
-### Server:
+#### Server:
 Install PubMQ package globally:
 ```
 npm install -g pubmq
@@ -28,7 +28,7 @@ pubmq startup <distribution>
 ```
 
 ## Usage
-### Subscriber
+#### Subscriber
 ```javascript
 const PubMQClient = require("pubmq").Client;
 let client = new PubMQClient();
@@ -50,7 +50,7 @@ client.connect("localhost:14850", (error) => {
 
 // Output after pub: Hello World
 ```
-### Publisher
+#### Publisher
 ```javascript
 const PubMQClient = require("pubmq").Client;
 let client = new PubMQClient();
@@ -63,3 +63,22 @@ client.connect("localhost:14850", (error) => {
   client.publish("test", "Hello World");
 });
 ```
+
+## Features & Limitations
+#### Features
+- Lightweight code and protocol
+- Pub/Sub
+- Unsub
+- Message Queue
+- TTL for Messages
+- Direct messaging *(upcoming)*
+
+#### Limitations
+- Message size is limited to max UDP packet size *(about 64kb)*
+- Messages are only stored in memory *(since messages are short lived this shouldn't be an issue)*
+- Deliveries aren't guaranteed
+- No congestion avoidance/control *(planned fix)*
+
+
+## License
+[MIT](https://raw.githubusercontent.com/schahriar/pubmq/master/LICENSE)
