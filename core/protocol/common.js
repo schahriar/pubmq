@@ -53,6 +53,9 @@ class PubMQProtocol extends EventEmitter {
       case "SUB":
         this.subscribe(sender, channel, buffer);
       break;
+      case "UNSUB":
+        this.unsubscribe(sender, channel);
+      break;
       case "RES":
         this.resource(sender, channel, buffer);
       break;

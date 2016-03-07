@@ -14,6 +14,10 @@ class PubMQClient extends PubMQProtocol {
     this.send(["SUB", channel], this.address, this.port + "");
   }
   
+  unsubscribe(channel) {
+    this.send(["UNSUB", channel], this.address);
+  }
+  
   publish(channel, message) {
     this.send(["PUB", channel], this.address, message);
   }

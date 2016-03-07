@@ -44,6 +44,13 @@ class Channel {
     
     map.queue.push(message);
   }
+  
+  removeAddress(name, address) {
+    let map = this.map.get(name);
+    if (!map) return false;
+    
+    map.list.delete(address);
+  }
 }
 
 module.exports = Channel;

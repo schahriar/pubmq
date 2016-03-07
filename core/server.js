@@ -45,6 +45,10 @@ class PubMQServer extends PubMQProtocol {
     }
   }
   
+  unsubscribe(sender, channel) {
+    this.channels.removeAddress(channel, sender);
+  }
+  
   hasChannel(name) {
     return this.channels.has(name);
   }
